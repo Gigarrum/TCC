@@ -4,14 +4,15 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from VoxNet import Net,DatasetAPPM
+from Nets import VoxNet
+from DatasetAPPM import DatasetAPPM
 
 #Define device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
 #Create neural network
-net = Net()
+net = VoxNet()
 net.to(device)
 
 #Define loss criterion

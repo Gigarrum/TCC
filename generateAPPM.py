@@ -1,5 +1,6 @@
 from DataTransformer import DataTransformer
-from VoxNet import Net,DatasetAPPM
+from Nets import VoxNet
+from DatasetAPPM import DatasetAPPM
 import torch
 import torchvision.transforms as transforms
 

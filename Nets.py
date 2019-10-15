@@ -10,16 +10,16 @@ import torch.optim as optim
 import h5py
 import time
 
-class Net(nn.Module):
+class VoxNet(nn.Module):
 
     def __init__(self):
-        super(Net, self).__init__()
+        super(VoxNet, self).__init__()
         # 4 input image channel, 6 output channels, 3x3x3 square convolution
         # kernel
-        self.conv1 = nn.Conv3d(4, 4, 3)
-        self.conv2 = nn.Conv3d(4, 4, 3)
+        self.conv1 = nn.Conv3d(4, 6, 3)
+        self.conv2 = nn.Conv3d(6, 16, 3)
         # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(4 * 13 * 13 * 13, 120) 
+        self.fc1 = nn.Linear(16 * 13 * 13 * 13, 120) 
         self.fc2 = nn.Linear(120, 20)
     
     def forward(self, x):
@@ -28,7 +28,7 @@ class Net(nn.Module):
         x = F.max_pool3d(F.relu(self.conv2(x)), (2,2,2))
         x = x.view(-1, self.num_flat_features(x))
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        self.fc2(x)
         return x
 
     def num_flat_features(self, x):
@@ -103,66 +103,3 @@ class Net(nn.Module):
         self.load_state_dict(torch.load(weight_filename))
         self.eval()
 
-#Aminoacid position propension matrix (APPM)
-class DatasetAPPM(Dataset):
-    
-    class_id = {'ALA' : 0, 'ARG' : 1, 'ASN' : 2, 'ASP' : 3, 'CYS' : 4, 'GLU' : 5,
-           'GLN' : 6, 'GLY' : 7, 'HIS' : 8, 'ILE' : 9, 'LEU' : 10, 'LYS' : 11,
-           'MET' : 12, 'PHE' : 13, 'PRO' : 14, 'SER' : 15, 'THR' : 16, 'TRP' : 17, 'TYR' : 18,
-           'VAL' : 19}
-    id_class = {0 : 'ALA', 1 : 'ARG', 2 : 'ASN', 3 : 'ASP', 4 : 'CYS', 5 : 'GLU',
-          6 : 'GLN', 7 : 'GLY', 8 : 'HIS', 9 : 'ILE', 10 : 'LEU', 11 : 'LYS',
-          12 : 'MET', 13 : 'PHE', 14 : 'PRO', 15 : 'SER', 16 : 'THR', 17 : 'TRP', 18 : 'TYR',
-          19 : 'VAL'}
-    
-    def __init__(self, dir_path, transform=None):
-        
-        #Store database file paths
-        self.data = []
-        self.transform = transform
-        
-        #Recover file paths from directory
-        p = Path(dir_path)
-        assert(p.is_dir())
-        self.data = sorted(p.glob('*.hdf5'))
-        
-        
-    def __len__(self):
-        return len(self.data)
-    
-    def __getitem__(self, index):
-        
-        #Recover grid from dataset and label from filename
-        with h5py.File(self.data[index]) as h5_file:
-            resIdx = str(self.data[index]).split('_')[1]
-            label = str(self.data[index]).split('_')[-1].split('.')[0]
-            label = self.class_to_id(label)
-            channels = list(h5_file['grid'])
-            
-        
-        if self.transform is not None:
-            
-            transf_channels = []
-            
-            #Apply transformations on each grid channel
-            for channel in channels: 
-                transf_channels.append(self.transform(channel))
-                
-            #Stack transformed channels to create 4D grid
-            grid = torch.stack(transf_channels,dim=-4)
-            grid = grid.float()
-            grid = grid - 0.5 #Normalizing data beetween -0.5 and 0.5
-            
-            return grid, label, resIdx
-        
-        else:
-            
-            #Stack channels to create 4D grid
-            grid = torch.stack(channels,dim=-4) 
-            return grid, label, resIdx
-        
-    def class_to_id(self,_class):
-        return  torch.tensor(self.class_id[_class],dtype=torch.long)
-        
-    def id_to_class(self,_id):
-        return self.id_class[_id]
