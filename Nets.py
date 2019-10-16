@@ -28,7 +28,7 @@ class VoxNet(nn.Module):
         x = F.max_pool3d(F.relu(self.conv2(x)), (2,2,2))
         x = x.view(-1, self.num_flat_features(x))
         x = F.relu(self.fc1(x))
-        self.fc2(x)
+        x = self.fc2(x)
         return x
 
     def num_flat_features(self, x):
@@ -41,6 +41,7 @@ class VoxNet(nn.Module):
     def trainNet(self,trainloader,criterion,optimizer,epochs,device):
 
         for epoch in range(epochs):  # loop over the dataset multiple times
+            print(self)
 
             #Benchmark
             startTime = time.time()
@@ -53,6 +54,8 @@ class VoxNet(nn.Module):
                 # send data to device
                 images = images.to(device)
                 labels = labels.to(device)
+
+                print(labels)
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
@@ -93,8 +96,29 @@ class VoxNet(nn.Module):
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-        print('Network Accuracy: %d %%' % (
+        print('Network Total Accuracy: %d %%' % (
             100 * correct / total))
+
+        try:
+            class_correct = list(0. for i in range(10))
+            class_total = list(0. for i in range(10))
+            with torch.no_grad():
+                for data in testloader:
+                    images, labels, _ = data
+                    outputs = self(images)
+                    _, predicted = torch.max(outputs, 1)
+                    c = (predicted == labels).squeeze()
+                    for i in range(4):
+                        label = labels[i]
+                        class_correct[label] += c[i].item()
+                        class_total[label] += 1
+
+            for i in range(10):
+                print('Accuracy of %5s : %2d %%' % (
+                    classes[i], 100 * class_correct[i] / class_total[i]))
+        except Exception as ex:
+            print('Test for each class failed by following exception: ',ex)
+
 
     def save(self,weight_filename):
         torch.save(self.state_dict(), weight_filename)
@@ -103,3 +127,239 @@ class VoxNet(nn.Module):
         self.load_state_dict(torch.load(weight_filename))
         self.eval()
 
+class DeeperVoxNet(nn.Module):
+
+    def __init__(self):
+        super(DeeperVoxNet, self).__init__()
+        # 4 input image channel, 6 output channels, 3x3x3 square convolution
+        # kernel
+        self.conv1 = nn.Conv3d(4, 6, 3)
+        self.conv2 = nn.Conv3d(6, 16, 3)
+        # an affine operation: y = Wx + b
+        self.fc1 = nn.Linear(16 * 13 * 13 * 13, 2048)
+        self.fc2 = nn.Linear(2048, 2048)
+        self.fc3 = nn.Linear(2048, 512)
+        self.fc4 = nn.Linear(512, 512)
+        self.fc5 = nn.Linear(512, 20)
+    
+    def forward(self, x):
+        x = (F.relu(self.conv1(x)))
+        # Max pooling over a (2,2,2) window
+        x = F.max_pool3d(F.relu(self.conv2(x)), (2,2,2))
+        x = x.view(-1, self.num_flat_features(x))
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = self.fc5(x)
+        return x
+
+    def num_flat_features(self, x):
+        size = x.size()[1:]  # all dimensions except the batch dimension
+        num_features = 1
+        for s in size:
+             num_features *= s
+        return num_features
+
+    def trainNet(self,trainloader,criterion,optimizer,epochs,device):
+
+        for epoch in range(epochs):  # loop over the dataset multiple times
+            print(self)
+            
+            #Benchmark
+            startTime = time.time()
+
+            running_loss = 0.0
+            for i, data in enumerate(trainloader, 0):
+                # get the inputs; data is a list of [inputs, labels]
+                images, labels, _ = data
+
+                # send data to device
+                images = images.to(device)
+                labels = labels.to(device)
+
+                #print(labels)
+
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward + backward + optimize
+                outputs = self(images)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
+
+                # print statistics
+                running_loss += loss.item()
+                #if i % 10 == 9:    # print every 10 mini-batches
+                print('[%d, %5d] loss: %.3f' %
+                    (epoch + 1, i + 1, running_loss / 1))
+                running_loss = 0.0
+
+            #Benchmark
+            endTime = time.time()
+            print('Epoch Total time: ',endTime - startTime)
+
+        print('Finished Training')
+
+    def testNet(self,testloader,device):
+
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data in testloader:
+                images, labels, _ = data
+
+                # send data to device
+                images = images.to(device)
+                labels = labels.to(device)
+
+                outputs = self(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        print('Network Total Accuracy: %d %%' % (
+            100 * correct / total))
+
+        try:
+            class_correct = list(0. for i in range(10))
+            class_total = list(0. for i in range(10))
+            with torch.no_grad():
+                for data in testloader:
+                    images, labels, _ = data
+                    outputs = self(images)
+                    _, predicted = torch.max(outputs, 1)
+                    c = (predicted == labels).squeeze()
+                    for i in range(4):
+                        label = labels[i]
+                        class_correct[label] += c[i].item()
+                        class_total[label] += 1
+
+            for i in range(10):
+                print('Accuracy of %5s : %2d %%' % (
+                    classes[i], 100 * class_correct[i] / class_total[i]))
+        except Exception as ex:
+            print('Test for each class failed by following exception: ',ex)
+
+
+    def save(self,weight_filename):
+        torch.save(self.state_dict(), weight_filename)
+
+    def load(self,weight_filename):
+        self.load_state_dict(torch.load(weight_filename))
+        self.eval()
+
+
+
+class MLP(nn.Module):
+
+    def __init__(self):
+        super(MLP, self).__init__()
+        
+        self.fc1 = nn.Linear(30 * 30 * 30 * 30, 15 * 15 * 15 * 15) 
+        self.fc2 = nn.Linear(15 * 15 * 15 * 15, 7 * 7 * 7 * 7)
+        self.fc3 = nn.Linear(7 * 7 * 7 * 7, 20)
+    
+    def forward(self, x):
+        x = x.view(-1, self.num_flat_features(x))
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
+    def num_flat_features(self, x):
+        size = x.size()[1:]  # all dimensions except the batch dimension
+        num_features = 1
+        for s in size:
+             num_features *= s
+        return num_features
+
+    def trainNet(self,trainloader,criterion,optimizer,epochs,device):
+
+        for epoch in range(epochs):  # loop over the dataset multiple times
+            print(self)
+
+            #Benchmark
+            startTime = time.time()
+
+            running_loss = 0.0
+            for i, data in enumerate(trainloader, 0):
+                # get the inputs; data is a list of [inputs, labels]
+                images, labels, _ = data
+
+                # send data to device
+                images = images.to(device)
+                labels = labels.to(device)
+
+                print(labels)
+
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward + backward + optimize
+                outputs = self(images)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
+
+                # print statistics
+                running_loss += loss.item()
+                #if i % 10 == 9:    # print every 10 mini-batches
+                print('[%d, %5d] loss: %.3f' %
+                    (epoch + 1, i + 1, running_loss / 1))
+                running_loss = 0.0
+
+            #Benchmark
+            endTime = time.time()
+            print('Epoch Total time: ',endTime - startTime)
+
+        print('Finished Training')
+
+    def testNet(self,testloader,device):
+
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data in testloader:
+                images, labels, _ = data
+
+                # send data to device
+                images = images.to(device)
+                labels = labels.to(device)
+
+                outputs = self(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        print('Network Total Accuracy: %d %%' % (
+            100 * correct / total))
+
+        try:
+            class_correct = list(0. for i in range(10))
+            class_total = list(0. for i in range(10))
+            with torch.no_grad():
+                for data in testloader:
+                    images, labels, _ = data
+                    outputs = self(images)
+                    _, predicted = torch.max(outputs, 1)
+                    c = (predicted == labels).squeeze()
+                    for i in range(4):
+                        label = labels[i]
+                        class_correct[label] += c[i].item()
+                        class_total[label] += 1
+
+            for i in range(10):
+                print('Accuracy of %5s : %2d %%' % (
+                    classes[i], 100 * class_correct[i] / class_total[i]))
+        except Exception as ex:
+            print('Test for each class failed by following exception: ',ex)
+
+
+    def save(self,weight_filename):
+        torch.save(self.state_dict(), weight_filename)
+
+    def load(self,weight_filename):
+        self.load_state_dict(torch.load(weight_filename))
+        self.eval()
