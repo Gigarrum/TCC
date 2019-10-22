@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from Nets import VoxNet,MLP,DeeperVoxNet,VoxNet_VLI
+from Nets import VoxNet,MLP,DeeperVoxNet,VoxNet_VLI,MLP_VLI
 from DatasetAPPM import DatasetAPPM,DatasetAPPM_VLI
 
 #Define device
@@ -12,7 +12,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
 #Create neural network
-net = VoxNet_VLI()
+net = MLP_VLI()
 net.to(device)
 
 #Define loss criterion
@@ -20,7 +20,7 @@ criterion = nn.CrossEntropyLoss()
 
 #Define optimizer
 #optimizer = torch.optim.Adam(net.parameters(), lr=0.01) #Testado com 0.001, 0.01, 0.1 N convergiu
-optimizer = torch.optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
+optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 #Define pré-training data transformations
 transform = transforms.Compose(
