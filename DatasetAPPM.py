@@ -57,7 +57,7 @@ class DatasetAPPM(Dataset):
             #Stack transformed channels to create 4D grid
             grid = torch.stack(transf_channels,dim=-4)
             grid = grid.float()
-            grid = grid - 0.5 #Normalizing data beetween -0.5 and 0.5
+            #grid = grid - 0.5 #Normalizing data beetween -0.5 and 0.5
             
             return grid, label, resIdx
         
