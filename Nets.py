@@ -41,15 +41,26 @@ class TheNet(nn.Module):
              num_features *= s
         return num_features
 
-    def trainNet(self,trainloader,criterion,optimizer,epochs,device):
+    def trainNet(self,trainloader,trainset_length,validationloader,validationset_length,filename,criterion,optimizer,epochs,device):
+
+        #Print Net configuration
+        print(self)
 
         for epoch in range(epochs):  # loop over the dataset multiple times
-            print(self)
+            
+            #Restart loss handlers values
+            train_epoch_loss = 0
+            validation_epoch_loss = 0
 
-            #Benchmark
+            #Start Benchmark timer
             startTime = time.time()
 
+            #Enter training mode
+            self.train()
+
             running_loss = 0.0
+            
+            #--------------------------Train loop------------------------------
             for i, data in enumerate(trainloader, 0):
                 # get the inputs; data is a list of [inputs, labels]
                 images, labels, _ = data
@@ -72,6 +83,9 @@ class TheNet(nn.Module):
                 loss.backward()
                 optimizer.step()
 
+                #Increment epoch loss value
+                train_epoch_loss += outputs.shape[0] * loss.item()
+
                 # print statistics
                 running_loss += loss.item()
                 #if i % 10 == 9:    # print every 10 mini-batches
@@ -79,9 +93,60 @@ class TheNet(nn.Module):
                     (epoch + 1, i + 1, running_loss / 1))
                 running_loss = 0.0
 
-            #Benchmark
+            #-------------------------------------------------------------------
+
+            #Finish Benchmark timer
+            print('---------------Epoch ' + str(epoch+1) + '---------------') 
             endTime = time.time()
-            print('Epoch Total time: ',endTime - startTime)
+            print('Total time:',endTime - startTime)
+            #Print TRAIN epoch loss
+            train_epoch_loss = train_epoch_loss / trainset_length
+            print('Train loss:', train_epoch_loss)
+
+            #Enter evaluation mode
+            self.eval()
+
+            correct = 0
+            total = 0
+
+            #--------------------------Validation Loop--------------------------
+            for data in testloader:
+                images, labels, _ = data
+
+                # send data to device
+                images = images.to(device)
+                labels = labels.to(device)
+
+                #Calculate validation loss
+                outputs = self(images)
+                loss = criterion(outputs, labels)
+
+                #Increment epoch loss value
+                validation_epoch_loss += outputs.shape[0] * loss.item()
+
+                outputs = self(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+            #---------------------------------------------------------------------
+
+            #Finish validation epoch loss calculation
+            validation_epoch_loss = validation_epoch_loss / validationset_length
+            print('Test loss:',validation_epoch_loss)
+
+            #Calculate epoch accuracy
+            epoch_accuracy = (100 * correct / total)
+            print('Accuracy:', epoch_accuracy, '%')
+
+            print('--------------------------------------------------------') 
+
+            epoch_data = ','.join('epoch[' +str(epoch)+ ']','train_loss[' +str(train_epoch_loss)+']','test_loss['+str(validation_epoch_loss)+']','accuracy['+str(epoch_accuracy)+']') + '\n'
+
+            #Save epoch data on file for future analysis
+            with open(filename, 'a') as f:
+                f.write(epoch_data + '\n')
+
 
         print('Finished Training')
 

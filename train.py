@@ -11,6 +11,12 @@ from DatasetAPPM import DatasetAPPM,DatasetAPPM_VLI
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
+#Define net weights filename
+weights_filename = 'weights.pth'
+
+#Define epochs data filename
+epochs_data_filename = 'epochs_data.txt'
+
 #Create neural network
 # net = MLP_VLI()
 net = TheNet()
@@ -23,6 +29,9 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=0.1) #Testado com 0.001, 0.01, 0.1 N convergiu
 # optimizer = torch.optim.SGD(net.parameters(), lr=0.000001, momentum=0.9)
 
+#Define number of training epochs
+num_of_epochs = 100
+
 #Define pré-training data transformations
 transform = transforms.Compose(
     [transforms.ToTensor()])
@@ -34,7 +43,7 @@ print('Loading trainset...')
 trainset = DatasetAPPM('/mnt/10%_top8000_50hom_discretized_full_train60_20_20/train',transform = transform)
 
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=256,
-                                          shuffle=True, num_workers=1)
+                                          shuffle=True, num_workers=0)
 
 print('Trainset loaded.') 
 
@@ -50,7 +59,7 @@ print('Validationset loaded.')
 #Train net
 print('Training net...')
 
-net.trainNet(trainloader,criterion,optimizer,200,device)
+net.trainNet(trainloader,len(trainset),validationloader,len(validationset),epochs_data_filename,criterion,optimizer,num_of_epochs,device)
 
 print('Training finished.')
 
@@ -63,7 +72,7 @@ net.testNet(validationloader,device)
 print('Net validated.')
 
 #Save net
-net.save('weights.pth')
+net.save(weights_filename)
 
 print('Net saved.')
 
