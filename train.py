@@ -6,20 +6,23 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from Nets import VoxNet,MLP,DeeperVoxNet,VoxNet_VLI,MLP_VLI,TheNet
 from DatasetAPPM import DatasetAPPM,DatasetAPPM_VLI
+import sys
 
 #Define device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
 #Define net weights filename
-weights_filename = 'weights.pth'
+#weights_filename = 'weights.pth'
+weights_filename = sys.argv[2]
 
 #Define epochs data filename
-epochs_data_filename = 'epochs_data.txt'
+#epochs_data_filename = 'epochs_data.txt'
+epochs_data_filename = sys.argv[3]
 
 #Create neural network
 # net = MLP_VLI()
-net = TheNet()
+net = TheNet(p=sys.argv[1])
 net.to(device)
 
 #Define loss criterion

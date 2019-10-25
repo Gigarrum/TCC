@@ -12,8 +12,9 @@ import time
 
 class TheNet(nn.Module):
 
-    def __init__(self):
+    def __init__(self,p=0.0):
         super(TheNet, self).__init__()
+        self.p = p
         
         #Convolution Layers
         self.conv1 = nn.Conv3d(4, 6, 7)
@@ -26,7 +27,7 @@ class TheNet(nn.Module):
         self.fc2 = nn.Linear(120, 20)
 
         #Dropout layers Definition
-        self.drop1 = nn.Dropout(p=0.5)
+        self.drop1 = nn.Dropout(p=self.p)
     
     def forward(self, x):
         x = (F.leaky_relu(self.conv1(x)))
@@ -34,7 +35,7 @@ class TheNet(nn.Module):
         x = (F.leaky_relu(self.conv3(x)))
         x = (F.leaky_relu(self.conv4(x)))
         x = x.view(-1, self.num_flat_features(x))
-        x = F.leaky_relu(self.drop1(self.fc1(x)))
+        x = F.leaky_relu(self.drop1(self.fc1(x))) #Dropout layer after activation, unless it's ReLu(Can acquire better performance)
         x = self.fc2(x)
         return x
 
