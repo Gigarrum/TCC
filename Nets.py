@@ -14,15 +14,20 @@ class TheNet(nn.Module):
 
     def __init__(self):
         super(TheNet, self).__init__()
-        # 4 input image channel, 6 output channels, 3x3x3 square convolution
-        # kernel
+        
+        #Convolution Layers
         self.conv1 = nn.Conv3d(4, 6, 7)
         self.conv2 = nn.Conv3d(6, 16, 7)
         self.conv3 = nn.Conv3d(16, 16, 7)
         self.conv4 = nn.Conv3d(16, 16, 7)
-        # an affine operation: y = Wx + b
+
+        #Fully connected layers
         self.fc1 = nn.Linear(16 * 6 * 6 * 6, 120)  
         self.fc2 = nn.Linear(120, 20)
+
+        #Dropout layers Definition
+        self.drop1 = nn.Dropout(p=0.5)
+        self.drop2 = nn.Dropout(p=0.5)
     
     def forward(self, x):
         x = (F.leaky_relu(self.conv1(x)))
@@ -30,8 +35,8 @@ class TheNet(nn.Module):
         x = (F.leaky_relu(self.conv3(x)))
         x = (F.leaky_relu(self.conv4(x)))
         x = x.view(-1, self.num_flat_features(x))
-        x = F.leaky_relu(self.fc1(x))
-        x = self.fc2(x)
+        x = F.leaky_relu(self.drop1(self.fc1(x)))
+        x = self.fc2(self.drop2(x))
         return x
 
     def num_flat_features(self, x):
@@ -45,6 +50,13 @@ class TheNet(nn.Module):
 
         #Print Net configuration
         print(self)
+
+        #Write csv file header
+        header = ','.join(['epoch','trainLoss','validationLoss','accuracy'])
+        with open(filename, 'a') as f:
+                f.write(header + '\n')
+
+                
 
         for epoch in range(epochs):  # loop over the dataset multiple times
             
@@ -142,7 +154,7 @@ class TheNet(nn.Module):
 
             print('--------------------------------------------------------') 
 
-            epoch_data = ','.join(['epoch[' +str(epoch+1)+ ']','train_loss[' +str(train_epoch_loss)+']','test_loss['+str(validation_epoch_loss)+']','accuracy['+str(epoch_accuracy)+']']) + '\n'
+            epoch_data = ','.join([str(epoch+1),str(train_epoch_loss),str(validation_epoch_loss),str(epoch_accuracy)])
 
             #Save epoch data on file for future analysis
             with open(filename, 'a') as f:
