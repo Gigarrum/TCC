@@ -17,12 +17,12 @@ print(device)
 weights_filename = sys.argv[2]
 
 #Define epochs data filename
-#epochs_data_filename = 'epochs_data.txt'
+#epochs_data_filename = 'epochs_data.csv'
 epochs_data_filename = sys.argv[3]
 
 #Create neural network
 # net = MLP_VLI()
-net = TheNet(p=sys.argv[1])
+net = TheNet(p=float(sys.argv[1]))
 net.to(device)
 
 #Define loss criterion
