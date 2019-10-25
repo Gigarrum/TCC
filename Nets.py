@@ -110,7 +110,7 @@ class TheNet(nn.Module):
             total = 0
 
             #--------------------------Validation Loop--------------------------
-            for data in testloader:
+            for data in validationloader:
                 images, labels, _ = data
 
                 # send data to device
@@ -133,7 +133,8 @@ class TheNet(nn.Module):
 
             #Finish validation epoch loss calculation
             validation_epoch_loss = validation_epoch_loss / validationset_length
-            print('Test loss:',validation_epoch_loss)
+            #print VALIDATION epoch loss
+            print('Validation loss:',validation_epoch_loss)
 
             #Calculate epoch accuracy
             epoch_accuracy = (100 * correct / total)
@@ -141,7 +142,7 @@ class TheNet(nn.Module):
 
             print('--------------------------------------------------------') 
 
-            epoch_data = ','.join('epoch[' +str(epoch)+ ']','train_loss[' +str(train_epoch_loss)+']','test_loss['+str(validation_epoch_loss)+']','accuracy['+str(epoch_accuracy)+']') + '\n'
+            epoch_data = ','.join(['epoch[' +str(epoch+1)+ ']','train_loss[' +str(train_epoch_loss)+']','test_loss['+str(validation_epoch_loss)+']','accuracy['+str(epoch_accuracy)+']']) + '\n'
 
             #Save epoch data on file for future analysis
             with open(filename, 'a') as f:

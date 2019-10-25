@@ -26,7 +26,7 @@ net.to(device)
 criterion = nn.CrossEntropyLoss()
 
 #Define optimizer
-optimizer = torch.optim.Adam(net.parameters(), lr=0.1) #Testado com 0.001, 0.01, 0.1 N convergiu
+optimizer = torch.optim.Adam(net.parameters(), lr=0.0001) 
 # optimizer = torch.optim.SGD(net.parameters(), lr=0.000001, momentum=0.9)
 
 #Define number of training epochs
