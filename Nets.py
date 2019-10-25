@@ -27,7 +27,6 @@ class TheNet(nn.Module):
 
         #Dropout layers Definition
         self.drop1 = nn.Dropout(p=0.5)
-        self.drop2 = nn.Dropout(p=0.5)
     
     def forward(self, x):
         x = (F.leaky_relu(self.conv1(x)))
@@ -36,7 +35,7 @@ class TheNet(nn.Module):
         x = (F.leaky_relu(self.conv4(x)))
         x = x.view(-1, self.num_flat_features(x))
         x = F.leaky_relu(self.drop1(self.fc1(x)))
-        x = self.fc2(self.drop2(x))
+        x = self.fc2(x)
         return x
 
     def num_flat_features(self, x):
