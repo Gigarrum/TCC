@@ -127,7 +127,7 @@ class TheNet(nn.Module):
 
             #Calculate epoch TRAIN accuracy
             train_epoch_accuracy = (100 * correct / total)
-            print('Accuracy:', train_epoch_accuracy, '%')
+            print('Train Accuracy:', train_epoch_accuracy, '%')
 
             #Enter evaluation mode
             self.eval()
@@ -165,7 +165,7 @@ class TheNet(nn.Module):
 
             #Calculate epoch VALIDATION accuracy
             validation_epoch_accuracy = (100 * correct / total)
-            print('Accuracy:', validation_epoch_accuracy, '%')
+            print('Validation Accuracy:', validation_epoch_accuracy, '%')
 
             print('--------------------------------------------------------') 
 
