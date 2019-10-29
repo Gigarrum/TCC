@@ -9,6 +9,7 @@ import torchvision.transforms as transforms
 import torch.optim as optim
 import h5py
 import time
+import math
 
 class TheNet(nn.Module):
 
@@ -56,13 +57,15 @@ class TheNet(nn.Module):
         with open(filename, 'a') as f:
                 f.write(header + '\n')
 
-                
-
         for epoch in range(epochs):  # loop over the dataset multiple times
             
             #Restart loss handlers values
             train_epoch_loss = 0
             validation_epoch_loss = 0
+
+            #Restart squared loss handlers values deviation values
+            train_epoch_squared_loss = 0
+            validation_epoch_squared_loss = 0
 
             #Start Benchmark timer
             startTime = time.time()
@@ -105,6 +108,9 @@ class TheNet(nn.Module):
 
                 #Increment epoch loss value
                 train_epoch_loss += outputs.shape[0] * loss.item()
+
+                #Increment epoch loss standart deviation
+
 
                 # print statistics
                 running_loss += loss.item()
