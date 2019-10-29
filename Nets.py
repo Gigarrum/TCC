@@ -52,7 +52,7 @@ class TheNet(nn.Module):
         print(self)
 
         #Write csv file header
-        header = ','.join(['epoch','trainLoss','validationLoss','accuracy'])
+        header = ','.join(['epoch','trainLoss','trainAccuracy','validationLoss','validationAccuracy'])
         with open(filename, 'a') as f:
                 f.write(header + '\n')
 
@@ -71,7 +71,9 @@ class TheNet(nn.Module):
             self.train()
 
             running_loss = 0.0
-            
+            correct = 0
+            total = 0
+
             #--------------------------Train loop------------------------------
             for i, data in enumerate(trainloader, 0):
                 # get the inputs; data is a list of [inputs, labels]
@@ -88,6 +90,12 @@ class TheNet(nn.Module):
 
                 # forward + backward + optimize
                 outputs = self(images)
+
+                #Calculate epoch train accuracy
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
                 loss = criterion(outputs, labels)
                 print(F.softmax(outputs))
                 print(torch.argmax(F.softmax(outputs), dim=1))
@@ -111,9 +119,15 @@ class TheNet(nn.Module):
             print('---------------Epoch ' + str(epoch+1) + '---------------') 
             endTime = time.time()
             print('Total time:',endTime - startTime)
-            #Print TRAIN epoch loss
+            
+            #Finish TRAIN epoch loss calculation
             train_epoch_loss = train_epoch_loss / trainset_length
+            #Print TRAIN epoch loss
             print('Train loss:', train_epoch_loss)
+
+            #Calculate epoch TRAIN accuracy
+            train_epoch_accuracy = (100 * correct / total)
+            print('Accuracy:', train_epoch_accuracy, '%')
 
             #Enter evaluation mode
             self.eval()
@@ -143,20 +157,21 @@ class TheNet(nn.Module):
 
             #---------------------------------------------------------------------
 
-            #Finish validation epoch loss calculation
+            #Finish VALIDATION epoch loss calculation
             validation_epoch_loss = validation_epoch_loss / validationset_length
+
             #print VALIDATION epoch loss
             print('Validation loss:',validation_epoch_loss)
 
-            #Calculate epoch accuracy
-            epoch_accuracy = (100 * correct / total)
-            print('Accuracy:', epoch_accuracy, '%')
+            #Calculate epoch VALIDATION accuracy
+            validation_epoch_accuracy = (100 * correct / total)
+            print('Accuracy:', validation_epoch_accuracy, '%')
 
             print('--------------------------------------------------------') 
 
-            epoch_data = ','.join([str(epoch+1),str(train_epoch_loss),str(validation_epoch_loss),str(epoch_accuracy)])
-
             #Save epoch data on file for future analysis
+            epoch_data = ','.join([str(epoch+1),str(train_epoch_loss),str(train_epoch_accuracy),str(validation_epoch_loss),str(validation_epoch_accuracy)])
+    
             with open(filename, 'a') as f:
                 f.write(epoch_data + '\n')
 
@@ -210,8 +225,6 @@ class TheNet(nn.Module):
     def load(self,weight_filename):
         self.load_state_dict(torch.load(weight_filename))
         self.eval()
-
-
 
 
 class VoxNet(nn.Module):
