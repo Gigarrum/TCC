@@ -98,7 +98,7 @@ class TheNet(nn.Module):
                 #Calculate epoch train accuracy
                 _, predicted = torch.max(outputs.data, 1)
                 #total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+                correct = (predicted == labels).sum().item()
 
                 loss = criterion(outputs, labels)
                 print(F.softmax(outputs))
@@ -108,10 +108,11 @@ class TheNet(nn.Module):
                 optimizer.step()
 
                 #Store epoch calculated TRAIN mean loss for usage in further metrics 
-                epochs_losses.append(outputs.shape[0])
+                epochs_losses.append(loss.item())
+                
                 #Store epoch calculated TRAIN mean loss for usage in further metrics 
                 epochs_accuracies.append((100 * correct) / outputs.shape[0])
-
+                print(epochs_accuracies)
                 # print statistics
                 running_loss += loss.item()
                 #if i % 10 == 9:    # print every 10 mini-batches
@@ -148,6 +149,9 @@ class TheNet(nn.Module):
             #Calculate TRAIN epoch mean accuracy standart deviation
             train_accuracy_std_deviation = numpy_epochs_accuracies.std()
             print('Train Accuracy standart deviation:', train_accuracy_std_deviation)
+            
+            print(numpy_epochs_losses)
+            print(numpy_epochs_accuracies)
 
             #Enter evaluation mode
             self.eval()
@@ -170,19 +174,19 @@ class TheNet(nn.Module):
                 images = images.to(device)
                 labels = labels.to(device)
 
-                #Calculate validation loss
+                #Calculate VALIDATION loss
                 outputs = self(images)
                 loss = criterion(outputs, labels)
 
-                #Store epoch calculated TRAIN mean loss for usage in further metrics 
-                epochs_losses.append(outputs.shape[0])
-                #Store epoch calculated TRAIN mean loss for usage in further metrics 
+                #Store epoch calculated VALIDATION mean loss for usage in further metrics 
+                epochs_losses.append(loss.item())
+                #Store epoch calculated VALIDATION mean loss for usage in further metrics 
                 epochs_accuracies.append((100 * correct) / outputs.shape[0])
 
                 outputs = self(images)
                 _, predicted = torch.max(outputs.data, 1)
                 #total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+                correct = (predicted == labels).sum().item()
 
             #---------------------------------------------------------------------
 
