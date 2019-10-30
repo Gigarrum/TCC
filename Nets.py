@@ -127,7 +127,7 @@ class TheNet(nn.Module):
                 train_epoch_squared_accuracy_accumulator += outputs.shape[0] * ((100 * correct / len(data))**2)
 
                 #DEBUG
-                print('Train Batch length: ',data)
+                print('Train Batch length: ',len(data))
 
                 # print statistics
                 running_loss += loss.item()
@@ -193,7 +193,7 @@ class TheNet(nn.Module):
                 validation_epoch_squared_accuracy_accumulator += outputs.shape[0] * ((100 * correct / len(data))**2)
 
                 #DEBUG
-                print('Validation Batch length: ',data)
+                print('Validation Batch length: ',len(data))
 
                 outputs = self(images)
                 _, predicted = torch.max(outputs.data, 1)
