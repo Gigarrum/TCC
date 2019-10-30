@@ -130,8 +130,8 @@ class TheNet(nn.Module):
             numpy_epochs_losses = np.array(epochs_losses)
             numpy_epochs_accuracies = np.array(epochs_accuracies)
             #Remove last element because batch can be from differente size.
-            numpy_epochs_losses = numpy_epoch_losses[:-1] 
-            numpy_epochs_accuracies = numpy_epoch_losses[:-1]
+            numpy_epochs_losses = numpy_epochs_losses[:-1] 
+            numpy_epochs_accuracies = numpy_epochs_accuracies[:-1]
 
             #Finish TRAIN epoch mean loss calculation
             train_epoch_loss = numpy_epochs_losses.mean()
@@ -194,8 +194,8 @@ class TheNet(nn.Module):
             numpy_epochs_losses = np.array(epochs_losses)
             numpy_epochs_accuracies = np.array(epochs_accuracies)
             #Remove last element because batch can be from differente size.
-            numpy_epochs_losses = numpy_epoch_losses[:-1] 
-            numpy_epochs_accuracies = numpy_epoch_losses[:-1]
+            numpy_epochs_losses = numpy_epochs_losses[:-1] 
+            numpy_epochs_accuracies = numpy_epochs_accuracies[:-1]
 
             #Finish VALIDATION epoch loss calculation
             validation_epoch_loss = numpy_epochs_losses.mean()
