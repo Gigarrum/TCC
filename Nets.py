@@ -112,7 +112,7 @@ class TheNet(nn.Module):
                 
                 #Store epoch calculated TRAIN mean loss for usage in further metrics 
                 epochs_accuracies.append((100 * correct) / outputs.shape[0])
-                print(epochs_accuracies)
+
                 # print statistics
                 running_loss += loss.item()
                 #if i % 10 == 9:    # print every 10 mini-batches
@@ -150,8 +150,9 @@ class TheNet(nn.Module):
             train_accuracy_std_deviation = numpy_epochs_accuracies.std()
             print('Train Accuracy standart deviation:', train_accuracy_std_deviation)
             
-            print(numpy_epochs_losses)
-            print(numpy_epochs_accuracies)
+            #DEBUG
+            #print(numpy_epochs_losses)
+            #print(numpy_epochs_accuracies)
 
             #Enter evaluation mode
             self.eval()
@@ -178,15 +179,15 @@ class TheNet(nn.Module):
                 outputs = self(images)
                 loss = criterion(outputs, labels)
 
-                #Store epoch calculated VALIDATION mean loss for usage in further metrics 
-                epochs_losses.append(loss.item())
-                #Store epoch calculated VALIDATION mean loss for usage in further metrics 
-                epochs_accuracies.append((100 * correct) / outputs.shape[0])
-
                 outputs = self(images)
                 _, predicted = torch.max(outputs.data, 1)
                 #total += labels.size(0)
                 correct = (predicted == labels).sum().item()
+
+                #Store epoch calculated VALIDATION mean loss for usage in further metrics 
+                epochs_losses.append(loss.item())
+                #Store epoch calculated VALIDATION mean loss for usage in further metrics 
+                epochs_accuracies.append((100 * correct) / outputs.shape[0])
 
             #---------------------------------------------------------------------
 
