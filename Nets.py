@@ -53,7 +53,7 @@ class TheNet(nn.Module):
         print(self)
 
         #Write csv file header
-        header = ','.join(['epoch','trainLoss','trainAccuracy','validationLoss','validationAccuracy'])
+        header = ','.join(['epoch','trainLoss','trainLossStandartDeviation','trainAccuracy','trainAccuracyStandartDeviation','validationLoss','validationLossStandartDeviation','validationAccuracy','validationAccuracyStandartDeviation'])
         with open(filename, 'a') as f:
                 f.write(header + '\n')
 
@@ -63,9 +63,17 @@ class TheNet(nn.Module):
             train_epoch_loss = 0
             validation_epoch_loss = 0
 
-            #Restart squared loss handlers values deviation values
+            #Restart squared loss handlers values 
             train_epoch_squared_loss = 0
             validation_epoch_squared_loss = 0
+
+            #Restart accuracy standart deviation loss handlers
+            train_epoch_accuracy_accumulator = 0
+            validation_epoch_accuracy_accumulator = 0
+
+            #Restart squared accuracy standart deviation loss handlers
+            train_epoch_squared_accuracy_accumulator = 0
+            validation_epoch_squared_accuracy_accumulator = 0
 
             #Start Benchmark timer
             startTime = time.time()
@@ -109,8 +117,17 @@ class TheNet(nn.Module):
                 #Increment epoch loss value
                 train_epoch_loss += outputs.shape[0] * loss.item()
 
-                #Increment epoch loss standart deviation
+                #Increment squared epoch loss value
+                train_epoch_squared_loss += outputs.shape[0] * (loss.item()**2)
 
+                #Increment accuracy epoch accumulator for further deviation calculation
+                train_epoch_accuracy_accumulator += outputs.shape[0] * (100 * correct / len(data))
+
+                #Increment squared accuracy epoch accumulator for further deviation calculation
+                train_epoch_squared_accuracy_accumulator += outputs.shape[0] * ((100 * correct / len(data))**2)
+
+                #DEBUG
+                print('Train Batch length: ',data)
 
                 # print statistics
                 running_loss += loss.item()
@@ -121,25 +138,35 @@ class TheNet(nn.Module):
 
             #-------------------------------------------------------------------
 
-            #Finish Benchmark timer
+            #Stop Benchmark timer
             print('---------------Epoch ' + str(epoch+1) + '---------------') 
             endTime = time.time()
-            print('Total time:',endTime - startTime)
+            print('Total train time:',endTime - startTime)
             
             #Finish TRAIN epoch loss calculation
             train_epoch_loss = train_epoch_loss / trainset_length
-            #Print TRAIN epoch loss
             print('Train loss:', train_epoch_loss)
+
+            #Calculate TRAIN loss standart deviation 
+            train_loss_std_deviation = math.sqrt((train_epoch_squared_loss - (train_epoch_loss**2)) / (trainset_length - 1))
+            print('Train loss standart deviation:', train_loss_std_deviation)
 
             #Calculate epoch TRAIN accuracy
             train_epoch_accuracy = (100 * correct / total)
             print('Train Accuracy:', train_epoch_accuracy, '%')
+
+            #Calculate TRAIN accuracy standart deviation
+            train_accuracy_std_deviation = math.sqrt((train_epoch_squared_accuracy_accumulator - (train_epoch_accuracy_accumulator**2)) / (trainset_length - 1))
+            print('Train Accuracy standart deviation:', train_accuracy_std_deviation)
 
             #Enter evaluation mode
             self.eval()
 
             correct = 0
             total = 0
+
+            #Start Benchmark timer
+            startTime = time.time()
 
             #--------------------------Validation Loop--------------------------
             for data in validationloader:
@@ -156,6 +183,18 @@ class TheNet(nn.Module):
                 #Increment epoch loss value
                 validation_epoch_loss += outputs.shape[0] * loss.item()
 
+                #Increment squared epoch loss value
+                validation_epoch_squared_loss += outputs.shape[0] * (loss.item()**2)
+
+                #Increment accuracy epoch accumulator for further deviation calculation
+                validation_epoch_accuracy_accumulator += outputs.shape[0] * (100 * correct / len(data))
+
+                #Increment squared accuracy epoch accumulator for further deviation calculation
+                validation_epoch_squared_accuracy_accumulator += outputs.shape[0] * ((100 * correct / len(data))**2)
+
+                #DEBUG
+                print('Validation Batch length: ',data)
+
                 outputs = self(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
@@ -163,24 +202,38 @@ class TheNet(nn.Module):
 
             #---------------------------------------------------------------------
 
+            #Stop Benchmark timer
+            endTime = time.time()
+            print('Total validation time:',endTime - startTime)
+
             #Finish VALIDATION epoch loss calculation
             validation_epoch_loss = validation_epoch_loss / validationset_length
 
             #print VALIDATION epoch loss
             print('Validation loss:',validation_epoch_loss)
 
+            #Calculate VALIDATION loss standart deviation 
+            validation_loss_std_deviation = math.sqrt((validation_epoch_squared_loss - (validation_epoch_loss**2)) / (validationset_length - 1))
+
+            #print VALIDATION loss standart deviation
+            print('Validation loss standart deviation:', validation_loss_std_deviation)
+
             #Calculate epoch VALIDATION accuracy
             validation_epoch_accuracy = (100 * correct / total)
             print('Validation Accuracy:', validation_epoch_accuracy, '%')
 
+            #Calculate TRAIN accuracy standart deviation
+            validation_accuracy_std_deviation = math.sqrt((validation_epoch_squared_accuracy_accumulator - (validation_epoch_accuracy_accumulator**2)) / (validationset_length - 1))
+            print('Validation Accuracy standart deviation:', validation_accuracy_std_deviation)
+
+
             print('--------------------------------------------------------') 
 
             #Save epoch data on file for future analysis
-            epoch_data = ','.join([str(epoch+1),str(train_epoch_loss),str(train_epoch_accuracy),str(validation_epoch_loss),str(validation_epoch_accuracy)])
-    
+            epoch_data = ','.join([str(epoch+1),str(train_epoch_loss),str(train_loss_std_deviation),str(train_epoch_accuracy),str(train_accuracy_std_deviation),str(validation_epoch_loss),str(validation_loss_std_deviation),str(validation_epoch_accuracy),str(validation_accuracy_std_deviation)])
+            
             with open(filename, 'a') as f:
                 f.write(epoch_data + '\n')
-
 
         print('Finished Training')
 
