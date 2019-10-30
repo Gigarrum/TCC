@@ -121,13 +121,13 @@ class TheNet(nn.Module):
                 train_epoch_squared_loss += outputs.shape[0] * (loss.item()**2)
 
                 #Increment accuracy epoch accumulator for further deviation calculation
-                train_epoch_accuracy_accumulator += outputs.shape[0] * (100 * correct / len(data))
+                train_epoch_accuracy_accumulator += outputs.shape[0] * (100 * correct / outputs.shape[0])
 
                 #Increment squared accuracy epoch accumulator for further deviation calculation
-                train_epoch_squared_accuracy_accumulator += outputs.shape[0] * ((100 * correct / len(data))**2)
+                train_epoch_squared_accuracy_accumulator += outputs.shape[0] * ((100 * correct / outputs.shape[0])**2)
 
                 #DEBUG
-                print('Train Batch length: ',len(data))
+                print('Train Batch length: ',outputs.shape[0])
 
                 # print statistics
                 running_loss += loss.item()
@@ -154,6 +154,10 @@ class TheNet(nn.Module):
             #Calculate epoch TRAIN accuracy
             train_epoch_accuracy = (100 * correct / total)
             print('Train Accuracy:', train_epoch_accuracy, '%')
+            
+            #DEBUG
+            print('SQUARED:',train_epoch_squared_accuracy_accumulator)
+            print('MEAN ACC:',train_epoch_accuracy_accumulator)
 
             #Calculate TRAIN accuracy standart deviation
             train_accuracy_std_deviation = math.sqrt((train_epoch_squared_accuracy_accumulator - (train_epoch_accuracy_accumulator**2)) / (trainset_length - 1))
@@ -187,13 +191,13 @@ class TheNet(nn.Module):
                 validation_epoch_squared_loss += outputs.shape[0] * (loss.item()**2)
 
                 #Increment accuracy epoch accumulator for further deviation calculation
-                validation_epoch_accuracy_accumulator += outputs.shape[0] * (100 * correct / len(data))
+                validation_epoch_accuracy_accumulator += outputs.shape[0] * (100 * correct / outputs.shape[0])
 
                 #Increment squared accuracy epoch accumulator for further deviation calculation
-                validation_epoch_squared_accuracy_accumulator += outputs.shape[0] * ((100 * correct / len(data))**2)
+                validation_epoch_squared_accuracy_accumulator += outputs.shape[0] * ((100 * correct / outputs.shape[0])**2)
 
                 #DEBUG
-                print('Validation Batch length: ',len(data))
+                print('Validation Batch length: ',outputs.shape[0])
 
                 outputs = self(images)
                 _, predicted = torch.max(outputs.data, 1)
