@@ -19,4 +19,4 @@ TRP ->  23.739
 TYR ->  58.396
 VAL ->  116.995
 
-TOTAL -> 1601652 (NAVERDADE CALCULEI A SOMA COMO 1601652 - 3000 = 1598652)
+TOTAL APROX --> 1601652 (I dont know why, but a really small number of files are empty)
