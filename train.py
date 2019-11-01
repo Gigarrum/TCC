@@ -42,8 +42,7 @@ transform = transforms.Compose(
 #Load train set
 print('Loading trainset...')
 
-# trainset = DatasetAPPM_VLI('/home/paulo/Documents/BD/10%_top8000_50hom_discretized_V_L_I_train60_20_20/train',transform = transform)
-trainset = DatasetAPPM('/mnt/10%_top8000_50hom_discretized_full_train60_20_20/train',transform = transform)
+trainset = DatasetAPPM('/mnt/paulo_dbs/balanced_8000perClass_top8000_50hom_discretized_full_train60_20_20/train',transform = transform)
 
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=256,
                                           shuffle=True, num_workers=0)
@@ -53,7 +52,7 @@ print('Trainset loaded.')
 #Load validation set
 print('Loading validationset...')
 
-validationset = DatasetAPPM('/mnt/10%_top8000_50hom_discretized_full_train60_20_20/validation',transform = transform)
+validationset = DatasetAPPM('/mnt/balanced_8000perClass_top8000_50hom_discretized_full_train60_20_20/validation',transform = transform)
 
 validationloader = torch.utils.data.DataLoader(validationset, batch_size=256,
                                          shuffle=False, num_workers=0)
