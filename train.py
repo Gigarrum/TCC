@@ -52,7 +52,7 @@ print('Trainset loaded.')
 #Load validation set
 print('Loading validationset...')
 
-validationset = DatasetAPPM('/mnt/balanced_8000perClass_top8000_50hom_discretized_full_train60_20_20/validation',transform = transform)
+validationset = DatasetAPPM('/mnt/paulo_dbs/balanced_8000perClass_top8000_50hom_discretized_full_train60_20_20/validation',transform = transform)
 
 validationloader = torch.utils.data.DataLoader(validationset, batch_size=256,
                                          shuffle=False, num_workers=0)
