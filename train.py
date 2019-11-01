@@ -35,7 +35,7 @@ optimizer = torch.optim.Adam(net.parameters(), lr=0.0001)
 #Define number of training epochs
 num_of_epochs = 100
 
-#Define pré-training data transformations
+#Define pre-training data transformations
 transform = transforms.Compose(
     [transforms.ToTensor()])
 
