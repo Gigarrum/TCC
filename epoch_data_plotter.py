@@ -43,7 +43,7 @@ for ax in (ax1,ax2):
     ax.label_outer()
 
 fig.tight_layout()
-plt.savefig(datapath + 'teste.png')
+plt.savefig(datapath + 'loss-accuracyXepoch.png')
 
 
 '''
