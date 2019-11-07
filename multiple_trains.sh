@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-python train.py 0.0 weights_drop00_balancedBD.pth epochs_data_drop00_balancedBD.csv
+#python train.py 0.0 weights_drop00_balancedBD.pth epochs_data_drop00_balancedBD.csv
 
 python train.py 0.3 weights_drop03_balancedBD.pth epochs_data_drop03_balancedBD.csv
 
