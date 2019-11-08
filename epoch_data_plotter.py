@@ -43,7 +43,11 @@ for ax in (ax1,ax2):
     ax.label_outer()
 
 fig.tight_layout()
+
+#Save png for easy visualization
 plt.savefig(datapath + 'loss-accuracyXepoch.png')
+#Save eps for vectorizade image
+plt.savefig(datapath + 'loss-accuracyXepoch.eps')
 
 
 '''
