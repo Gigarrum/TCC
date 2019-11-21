@@ -554,10 +554,10 @@ class VoxNet(nn.Module):
         super(VoxNet, self).__init__()
         # 4 input image channel, 6 output channels, 3x3x3 square convolution
         # kernel
-        self.conv1 = nn.Conv3d(4, 6, 5)
+        self.conv1 = nn.Conv3d(4, 6, 5,stride=2)
         self.conv2 = nn.Conv3d(6, 16, 3)
         # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(16 * 13 * 13 * 13, 128) 
+        self.fc1 = nn.Linear(16 * 5 * 5 * 5, 128) 
         self.fc2 = nn.Linear(128, 20)
     
     def forward(self, x):
