@@ -11,6 +11,7 @@ from sklearn.utils.multiclass import unique_labels
 import scikitplot as skplt
 import seaborn as sns
 import pandas as pd
+import matplotlib
 
 def class_to_id(classes):
 
@@ -88,10 +89,12 @@ def plot_confusion_matrix(y_true, y_pred, classes,
 if __name__ == "__main__":
   
   classes = ['ALA','ARG','ASN','ASP','CYS','GLU','GLN','GLY','HIS','ILE','LEU','LYS','MET','PHE','PRO','SER','THR','TRP','TYR','VAL']
-  '''
-  trainset_path = sys.argv[1]
-  weights_path = sys.argv[2]
+  
+  matplotlib.use('svg')
 
+  testset_path = sys.argv[1]
+  weights_path = sys.argv[2]
+  '''
   #Define device
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
   print(device)
@@ -103,9 +106,9 @@ if __name__ == "__main__":
   #Load Train set for inference
   print('Loading trainset...')
 
-  trainset = DatasetAPPM(trainset_path,transform = transform)
+  testset = DatasetAPPM(testset_path,transform = transform)
 
-  trainloader = torch.utils.data.DataLoader(trainset, batch_size=256,
+  testloader = torch.utils.data.DataLoader(testset, batch_size=256,
                                            shuffle=False, num_workers=0)
   print('Validationset loaded.')
 
@@ -120,7 +123,7 @@ if __name__ == "__main__":
   all_predictions = []
   '''
   with torch.no_grad():
-      for data in trainloader:
+      for data in testloader:
           grids, labels, resIdx = data
           print(labels)
           #output = model(grids)
@@ -131,7 +134,6 @@ if __name__ == "__main__":
 
           #_, predicted = torch.max(output.data, 1)
   '''
-
   all_labels = np.random.randint(20, size=256)
   all_predictions = np.random.randint(20, size=256)
 
@@ -139,8 +141,8 @@ if __name__ == "__main__":
   
   print(cm)
   ax = plot_confusion_matrix(all_labels,all_predictions,classes,normalize=True,title='Confusion Matrix')
-  #plot.show()
-  plt.savefig('confusionMatrix.png',figure_size=(12,12))
+  #plt.show()
+  plt.savefig('confusionMatrix.eps',figure_size=(12,12))
 
  #python confusion_matrix_plotter.py C:\Users\pbmau\Documents\Paulo\Faculdade\TCC\database\test_sampling\ C:\Users\pbmau\Documents\Paulo\Faculdade\TCC\System\experiments\TheNet-arch1\TheNet-db=10%-batch=256-Adam-lr=0,0001-mm=0,9-epcs=100\         
 
