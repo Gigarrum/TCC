@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from Nets import VoxNet,MLP,DeeperVoxNet,VoxNet_VLI,MLP_VLI,TheNet
+from Nets import VoxNet,MLP,DeeperVoxNet,VoxNet_VLI,MLP_VLI,TheNet,TheNet3
 from DatasetAPPM import DatasetAPPM,DatasetAPPM_VLI
 import sys
 
@@ -14,15 +14,19 @@ print(device)
 
 #Define net weights filename
 #weights_filename = 'weights.pth'
-weights_filename = sys.argv[2]
+weights_filename = sys.argv[3]
 
 #Define epochs data filename
 #epochs_data_filename = 'epochs_data.csv'
-epochs_data_filename = sys.argv[3]
+epochs_data_filename = sys.argv[4]
 
 #Create neural network
 # net = MLP_VLI()
-net = TheNet(p=float(sys.argv[1]))
+
+if sys.argv[5] == 'TheNet1':
+    net = TheNet(p=float(sys.argv[1]),fc1_n_neurons=int(sys.argv[2]))
+if sys.argv[5] == 'TheNet3':
+    net = TheNet3(p=float(sys.argv[1]),fc1_n_neurons=int(sys.argv[2]))
 net.to(device)
 
 #Define loss criterion
@@ -33,7 +37,7 @@ optimizer = torch.optim.Adam(net.parameters(), lr=0.0001)
 # optimizer = torch.optim.SGD(net.parameters(), lr=0.000001, momentum=0.9)
 
 #Define number of training epochs
-num_of_epochs = 100
+num_of_epochs = int(sys.argv[6])
 
 #Define pre-training data transformations
 transform = transforms.Compose(
