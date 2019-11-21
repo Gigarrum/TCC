@@ -27,7 +27,10 @@ if sys.argv[5] == 'TheNet1':
     net = TheNet(p=float(sys.argv[1]),fc1_n_neurons=int(sys.argv[2]))
 if sys.argv[5] == 'TheNet3':
     net = TheNet3(p=float(sys.argv[1]),fc1_n_neurons=int(sys.argv[2]))
+if sys.argv[5] == 'VoxNet':
+    net = VoxNet()
 net.to(device)
+
 
 #Define loss criterion
 criterion = nn.CrossEntropyLoss()
