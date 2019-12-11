@@ -1,5 +1,5 @@
 from DataTransformer import DataTransformer
-from Nets import VoxNet,MLP
+from Nets import TheNet
 from DatasetAPPM import DatasetAPPM
 import torch
 import torchvision.transforms as transforms
@@ -8,13 +8,20 @@ dataTransformer = DataTransformer(21,0.7,4)
 
 dataTransformer.cleanDirectory('grids/')
 
-#PASS THIS PARAMETERS BY ARGC/ARGV
-_ = dataTransformer.transform('1a3aA.pdb','.','grids/')
+#PASS THIS PARAMETERS BY ARGC/ARGV + weights.pth path
+_ = dataTransformer.transform('1bpx.pdb','.','grids/')
+
+
+#Define device
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 
 #Loading model
-model = Net()
-model.load_state_dict(torch.load('weights.pth'))
-model.eval()
+net = TheNet(fc1_n_neurons=120)
+net.load_state_dict(torch.load('C:/Users/pbmau/Documents/Paulo/Faculdade/TCC/System/experiments/TheNet-arch1/TheNet-drop=0,3-db=balanced10%-batch=256-Adam-lr=0,0001-epcs=100/weights.pth'))
+net.eval()
+
+net.to(device)
 
 #Transformation to be done with loaded data
 transform = transforms.Compose(
@@ -27,21 +34,13 @@ inferset = DatasetAPPM('grids/',transform = transform)
 inferloader = torch.utils.data.DataLoader(inferset, batch_size=1,
                                          shuffle=False, num_workers=0)
 
-#Make infereces and mount Aminoacid position propension matrix (APPM)
-correct = 0
-total = 0
 APPM = []
-model.eval()
+
 with torch.no_grad():
     for data in inferloader:
         grids, labels, resIdx = data
-        output = model(grids)
+        output = net(grids)
         APPM.append((resIdx,output))
-        _, predicted = torch.max(output.data, 1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
 
-print('Network Accuracy: %d %%' % (
-    100 * correct / total))
+print(AAPM)
 
-#Generate file with inference values????????? 
